@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed | Feedback</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            transition: background-color 0.6s ease; 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+        }
+        .order-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+        .success-icon { font-size: 3rem; color: #2ecc71; margin-bottom: 10px; }
+        .order-number { font-weight: bold; color: #636e72; font-size: 0.9rem; margin-bottom: 20px; }
+        #emoji { font-size: 4.5rem; display: block; margin: 15px 0; transition: transform 0.2s; }
+        #emoji:hover { transform: scale(1.1); }
+        .score-display { font-weight: 600; font-size: 1.2rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body id="bg" style="background-color: #f8f9fa;">
+
+<div class="order-container">
+    <div class="success-icon">✔</div>
+    <h2 class="mb-1">Order Confirmed!</h2>
+    <div class="order-number">Order ID: #ORD-772910B</div>
+    
+    <hr>
+    
+    <div id="feedback-section">
+        <span id="emoji">😐</span>
+        <h5 class="mb-3">How easy was it to shop with us today?</h5>
+        
+        <div class="score-display"><span id="scoreVal">5</span> / 10</div>
+        <input type="range" class="form-range mb-4" min="1" max="10" value="5" id="scoreRange">
+        
+        <textarea id="comment" class="form-control mb-3" rows="3" placeholder="Any suggestions to make our checkout better?"></textarea>
+        
+        <button class="btn btn-dark btn-lg w-100" onclick="submitFeedback()">Submit Feedback</button>
+    </div>
+</div>
+
+<script>
+    const range = document.getElementById('scoreRange');
+    const bg = document.getElementById('bg');
+    const emoji = document.getElementById('emoji');
+    const scoreVal = document.getElementById('scoreVal');
+
+    // Real-time Sentiment Logic (CX: Visual Feedback)
+    range.addEventListener('input', () => {
+        const val = parseInt(range.value);
+        scoreVal.innerText = val;
+        
+        if(val <= 3) {
+            bg.style.backgroundColor = "#ff7675"; // Frustrated (Red)
+            emoji.innerText = "😞";
+        } else if (val <= 7) {
+            bg.style.backgroundColor = "#ffeaa7"; // Neutral (Yellow)
+            emoji.innerText = "😐";
+        } else {
+            bg.style.backgroundColor = "#55efc4"; // Delighted (Green)
+            emoji.innerText = "🤩";
+        }
+    });
+
+    // Full-Stack Communication (Asynchronous JS)
+    async function submitFeedback() {
+        const payload = {
+            score: range.value,
+            comment: document.getElementById('comment').value
+        };
+
+        try {
+            const response = await fetch('/submit', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                // Professional CX touch: Hide form and show thank you message
+                document.getElementById('feedback-section').innerHTML = `
+                    <div class="py-5">
+                        <h4 class="text-success">Thank you!</h4>
+                        <p>Your feedback helps us build a better experience.</p>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="location.reload()">Back to Home</button>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            alert("Oops! Something went wrong. Please try again.");
+        }
+    }
+</script>
+
+</body>
+</html>
